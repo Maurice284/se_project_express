@@ -52,7 +52,7 @@ const deleteItem = (req, res) => {
   clothingItem
     .findByIdAndUpdate(itemId)
     .orFail()
-    .then((item) => res.status(NO_CONTENT).send({}))
+    .then(() => res.status(NO_CONTENT).send({}))
     .catch((e) => {
       res.status(SERVER_ERROR).send({ message: "Error from deleteItem", e });
     });
