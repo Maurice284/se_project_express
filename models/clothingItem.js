@@ -11,6 +11,10 @@ const clothingItem = new mongoose.Schema({
   weather: {
     type: String,
     required: true,
+    enum: {
+      values: ["hot", "warm", "cold"],
+      message: "The weather must be hot, warm, or cold",
+    },
   },
   imageUrl: {
     type: String,
@@ -20,11 +24,21 @@ const clothingItem = new mongoose.Schema({
       message: "Link is not Valid",
     },
   },
-  // owner: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: user,
-  //   required: true,
-  // },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+
+  likes: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("clothingItems", clothingItem);

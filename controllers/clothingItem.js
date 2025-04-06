@@ -2,24 +2,31 @@ const clothingItem = require("../models/clothingItem");
 const {
   SERVER_ERROR,
   OK,
-  NO_CONTENT,
+  // NO_CONTENT,
   BAD_REQUEST_ERROR,
+  NOT_FOUND,
 } = require("../utils/errors");
 
 const createItem = (req, res) => {
+  // console.log("is this firing bro");
+  const owner = req.user._id;
   const { name, weather, imageUrl } = req.body;
 
   clothingItem
-    .create({ name, weather, imageUrl })
+    .create({ name, weather, imageUrl, owner })
+
     .then((item) => {
       console.log(item);
-      res.send({ data: item });
+      return res.send({ data: item });
     })
     .catch((e) => {
+      // console.log(e);
       if (e.name === "ValidationError")
-        res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
+        return res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
 
-      res.status(SERVER_ERROR).send({ message: "Error from createItem", e });
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: "Error from createItem" });
     });
 };
 
@@ -27,21 +34,8 @@ const getItems = (req, res) => {
   clothingItem
     .find({})
     .then((items) => res.status(OK).send(items))
-    .catch((e) => {
-      res.status(SERVER_ERROR).send({ message: "Error from getItems", e });
-    });
-};
-
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  clothingItem
-    .findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
-    .then((item) => res.status(OK).send({ data: item }))
-    .catch((e) => {
-      res.status(SERVER_ERROR).send({ message: "Error from updateItem", e });
+    .catch(() => {
+      res.status(SERVER_ERROR).send({ message: "Error from getItems" });
     });
 };
 
@@ -51,11 +45,73 @@ const deleteItem = (req, res) => {
   console.log(itemId);
   clothingItem
     .findByIdAndUpdate(itemId)
-    .orFail()
-    .then(() => res.status(NO_CONTENT).send({}))
-    .catch((e) => {
-      res.status(SERVER_ERROR).send({ message: "Error from deleteItem", e });
+    .orFail(() => {
+      const error = new Error("Card ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
+    .then((items) => res.status(OK).send(items))
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        res.status(NOT_FOUND).send({ message: "Not Found" });
+      } else if (err.name === "CastError") {
+        res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: "Error Invalid Item Id" });
+      } else {
+        res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
+      }
     });
 };
 
-module.exports = { createItem, getItems, updateItem, deleteItem };
+const addLike = (req, res) => {
+  const { itemId } = req.params;
+
+  clothingItem
+    .findByIdAndUpdate(
+      itemId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true }
+    )
+    .orFail()
+    .then((item) => res.status(OK).send(item))
+    .catch((e) => {
+      if (e.name === "CastError") {
+        return res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
+      } else if (err.statusCode === "NOT_FOUND") {
+        res.status(NOT_FOUND).send({ message: "Error Invalid Item Id" });
+      } else {
+        res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
+      }
+    });
+};
+
+const removeLike = (req, res) => {
+  const { itemId } = req.params;
+
+  clothingItem
+    .findByIdAndUpdate(
+      itemId,
+      { $pull: { likes: req.user._id } },
+      { new: true }
+    )
+    .orFail()
+    .then((item) => res.status(OK).send(item))
+    .catch((e) => {
+      console.log(e);
+      res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
+    });
+};
+
+// const updateItem = (req, res) => {
+//   res.status(OK).send({ message: "Updating item" });
+// };
+
+module.exports = {
+  createItem,
+  getItems,
+  // updateItem,
+  deleteItem,
+  addLike,
+  removeLike,
+};
