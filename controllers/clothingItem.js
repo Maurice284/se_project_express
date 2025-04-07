@@ -63,7 +63,7 @@ const deleteItem = (req, res) => {
 const addLike = (req, res) => {
   const { itemId } = req.params;
 
-  clothingItem
+  return clothingItem
     .findByIdAndUpdate(
       itemId,
       { $addToSet: { likes: req.user._id } },
@@ -71,14 +71,16 @@ const addLike = (req, res) => {
     )
     .orFail()
     .then((item) => res.status(OK).send(item))
-    .catch((e) => {
-      if (e.name === "CastError") {
+    .catch((err) => {
+      if (err.name === "CastError") {
         return res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
-      } else if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({ message: "Error Invalid Item Id" });
-      } else {
-        res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
       }
+      if (err.name === "DocumentNotFoundError") {
+        res.status(NOT_FOUND).send({ message: "Error Invalid Item Id" });
+      }
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: "Error from deleteItem" });
     });
 };
 
@@ -93,14 +95,14 @@ const removeLike = (req, res) => {
     )
     .orFail()
     .then((item) => res.status(OK).send(item))
-    .catch((e) => {
+    .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         res.status(NOT_FOUND).send({ message: "NotFound" });
       }
       if (err.name === "CastError") {
         res.status(BAD_REQUEST_ERROR).send({ message: "BadRequest" });
       }
-      console.log(e);
+      console.log(err);
       res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
     });
 };
