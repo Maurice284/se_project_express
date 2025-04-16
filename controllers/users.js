@@ -5,9 +5,18 @@ const {
   CREATED,
   BAD_REQUEST_ERROR,
   NOT_FOUND,
+  CONFLICT_ERROR,
 } = require("../utils/errors");
+const bcrypt = require("bcryptjs");
 
 // GET /users
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {})
+    .catch((err) => {});
+};
 
 const getUsers = (req, res) => {
   User.find({})
@@ -21,12 +30,22 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, email, password } = req.body;
   console.log("avatar:", avatar);
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    .then((user) => {
+      const userCopy = user.toObject();
 
-  User.create({ name, avatar })
-    .then((user) => res.status(CREATED).send(user))
+      delete userCopy.password;
+
+      return res.status(CREATED).send(userCopy);
+    })
     .catch((err) => {
+      if (err.code === 11000) {
+        return res.status(CONFLICT_ERROR).send({ message: "Conflict Error" });
+      }
       console.error(err);
       if (err.name === "ValidationError") {
         return res
@@ -63,4 +82,4 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+module.exports = { getUsers, createUser, getUser, login };

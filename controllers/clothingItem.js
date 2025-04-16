@@ -97,10 +97,10 @@ const removeLike = (req, res) => {
     .then((item) => res.status(OK).send(item))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({ message: "NotFound" });
+        return res.status(NOT_FOUND).send({ message: "NotFound" });
       }
       if (err.name === "CastError") {
-        res.status(BAD_REQUEST_ERROR).send({ message: "BadRequest" });
+        return res.status(BAD_REQUEST_ERROR).send({ message: "BadRequest" });
       }
       console.log(err);
       res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
