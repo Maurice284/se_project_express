@@ -42,6 +42,8 @@ const getItems = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
+  //before we delete the item, we need to check if the currently logged-in user owns this item
+  // and only allow them to delete it if they own it
   console.log(itemId);
   clothingItem
     .findByIdAndDelete(itemId)

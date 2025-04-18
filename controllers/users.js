@@ -6,16 +6,28 @@ const {
   BAD_REQUEST_ERROR,
   NOT_FOUND,
   CONFLICT_ERROR,
+  UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 
 // GET /users
 
 const login = (req, res) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
-    .then((user) => {})
-    .catch((err) => {});
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((err) => {
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: "Internal server error" });
+    });
 };
 
 const getUsers = (req, res) => {
@@ -58,9 +70,37 @@ const createUser = (req, res) => {
     });
 };
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
+const updateUserData = (req, res) => {
+  User.findByIdAndUpdate(
+    req.user._id,
+    {
+      name: req.body.name,
+      avatar: req.body.avatar,
+    },
+    { new: true, runValidators: true }
+  )
+    .orFail(() => {
+      const error = new Error("User Id Not Found ");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    })
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST_ERROR)
+          .send({ message: "An error has occurred on the server" });
+      } else if (err.name === NOT_FOUND) {
+        res.status(NOT_FOUND).send({ message: err.message });
+      } else {
+        res.status(SERVER_ERROR).send({ message: "Error from server" });
+      }
+    });
+};
+
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
     .orFail()
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
@@ -82,4 +122,10 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, login };
+module.exports = {
+  getUsers,
+  createUser,
+  getCurrentUser,
+  login,
+  updateUserData,
+};

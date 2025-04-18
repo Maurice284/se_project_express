@@ -5,3 +5,4 @@ export const OK = 200;
 // export const NO_CONTENT = 204;
 export const NOT_FOUND = 404;
 export const CONFLICT_ERROR = 409;
+export const UNAUTHORIZED_ERROR = 401;

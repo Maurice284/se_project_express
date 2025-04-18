@@ -1,7 +1,15 @@
 const router = require("express").Router();
-const { getUsers, createUser, getUser } = require("../controllers/users");
+const {
+  getUsers,
+  createUser,
+  getCurrentUser,
+  updateUserData,
+} = require("../controllers/users");
+const auth = require("../middlewares/auth");
 
-router.get("/", getUsers);
-router.get("/:userId", getUser);
+// endpoints start with /users
 
-module.exports = router;
+router.patch("/me", auth, updateUserData); // /users/me
+router.get("/me", auth, getCurrentUser); //http://localhost:3001/users/d1j29dj128dj12d12d
+
+module.exports = router; //req.params = {userId: d1j29dj128dj12d12d}
