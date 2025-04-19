@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const {
   OK,
@@ -6,10 +8,8 @@ const {
   BAD_REQUEST_ERROR,
   NOT_FOUND,
   CONFLICT_ERROR,
-  UNAUTHORIZED_ERROR,
+  // UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 
 // GET /users
@@ -24,6 +24,10 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
+      console.error(err);
+      if (err.message === "Incorrect email or password")
+        return res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
+
       return res
         .status(SERVER_ERROR)
         .send({ message: "Internal server error" });
@@ -91,7 +95,7 @@ const updateUserData = (req, res) => {
         return res
           .status(BAD_REQUEST_ERROR)
           .send({ message: "An error has occurred on the server" });
-      } else if (err.name === NOT_FOUND) {
+      } if (err.name === NOT_FOUND) {
         res.status(NOT_FOUND).send({ message: err.message });
       } else {
         res.status(SERVER_ERROR).send({ message: "Error from server" });

@@ -10,11 +10,11 @@ const {
 } = require("../controllers/clothingItem");
 const auth = require("../middlewares/auth");
 
-//all endpoints here start with /items
+// all endpoints here start with /items
 
 router.get("/", getItems); // /items/
 
-//router.use("/", auth)
+// router.use("/", auth)
 
 router.post("/", auth, createItem);
 

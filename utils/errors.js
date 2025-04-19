@@ -6,3 +6,4 @@ export const OK = 200;
 export const NOT_FOUND = 404;
 export const CONFLICT_ERROR = 409;
 export const UNAUTHORIZED_ERROR = 401;
+export const FORBIDDEN = 403;

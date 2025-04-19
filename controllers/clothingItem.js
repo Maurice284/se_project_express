@@ -5,6 +5,7 @@ const {
   // NO_CONTENT,
   BAD_REQUEST_ERROR,
   NOT_FOUND,
+  FORBIDDEN,
 } = require("../utils/errors");
 
 const createItem = (req, res) => {
@@ -42,16 +43,26 @@ const getItems = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  //before we delete the item, we need to check if the currently logged-in user owns this item
+  // before we delete the item, we need to check if the currently logged-in user owns this item
   // and only allow them to delete it if they own it
   console.log(itemId);
   clothingItem
-    .findByIdAndDelete(itemId)
+    .findById(itemId)
     .orFail()
-    .then((items) => res.status(OK).send(items))
+    .then((item) => {
+      if (item.owner.toString() !== req.user._id) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "Forbidden: You do not own this item" });
+      }
+      return clothingItem
+        .findByIdAndDelete(itemId)
+        .then((deletedItem) => res.status(OK).send(deletedItem));
+    })
+
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({ message: "Not Found" });
+        res.status(NOT_FOUND).send({ message: "Item Not Found" });
       } else if (err.name === "CastError") {
         res
           .status(BAD_REQUEST_ERROR)
@@ -105,7 +116,9 @@ const removeLike = (req, res) => {
         return res.status(BAD_REQUEST_ERROR).send({ message: "BadRequest" });
       }
       console.log(err);
-      res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: "Error from deleteItem" });
     });
 };
 

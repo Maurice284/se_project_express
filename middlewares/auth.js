@@ -1,5 +1,5 @@
-const { UNAUTHORIZED_ERROR } = require("../utils/errors");
 const jwt = require("jsonwebtoken");
+const { UNAUTHORIZED_ERROR } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 const auth = (req, res, next) => {
@@ -13,7 +13,7 @@ const auth = (req, res, next) => {
       .status(UNAUTHORIZED_ERROR)
       .send({ message: "Unauthorized Error" });
   }
-  req.user = payload; //{_id: 192831892311fj92}
-  next();
+  req.user = payload; // {_id: 192831892311fj92}
+  return next();
 };
 module.exports = auth;

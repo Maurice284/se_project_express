@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     },
   },
   email: {
-    //s bcrypt.hash("longpass", 10).then((hashedPassword)=>{}) 1982d1982d8192jd182jd9182dj918j2d8912d
+    // s bcrypt.hash("longpass", 10).then((hashedPassword)=>{}) 1982d1982d8192jd182jd9182dj918j2d8912d
     type: String,
     required: true,
     unique: true,
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 5,
-    select: false, //This prevent the password from being returned in queries by defailt
+    select: false, // This prevent the password from being returned in queries by defailt
   },
 });
 
@@ -42,8 +42,10 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
   return this.findOne({ email })
     .select({ password: true })
     .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error("Incorrect email or password"));
+      if (!user || !password) {
+        const error = new Error("Incorrect email or password");
+        error.name = "AuthorizationError";
+        return Promise.reject(error);
       }
 
       return bcrypt.compare(password, user.password).then((matched) => {
