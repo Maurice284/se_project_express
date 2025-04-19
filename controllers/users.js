@@ -8,7 +8,7 @@ const {
   BAD_REQUEST_ERROR,
   NOT_FOUND,
   CONFLICT_ERROR,
-  // UNAUTHORIZED_ERROR,
+  UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
@@ -16,7 +16,13 @@ const { JWT_SECRET } = require("../utils/config");
 
 const login = (req, res) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password)
+
+  if (!email || !password) {
+    return res
+      .status(BAD_REQUEST_ERROR)
+      .send({ message: "The password and email fields are required" });
+  }
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -26,7 +32,9 @@ const login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Incorrect email or password")
-        return res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
+        return res
+          .status(UNAUTHORIZED_ERROR)
+          .send({ message: "Unauthorize error" });
 
       return res
         .status(SERVER_ERROR)
@@ -34,21 +42,21 @@ const login = (req, res) => {
     });
 };
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(OK).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
-};
+// const getUsers = (req, res) => {
+//   User.find({})
+//     .then((users) => res.status(OK).send(users))
+//     .catch((err) => {
+//       console.error(err);
+//       return res
+//         .status(SERVER_ERROR)
+//         .send({ message: "An error has occurred on the server" });
+//     });
+// };
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  console.log("avatar:", avatar);
-  bcrypt
+  // console.log("avatar:", avatar);
+  return bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) => {
@@ -74,8 +82,7 @@ const createUser = (req, res) => {
     });
 };
 
-const updateUserData = (req, res) => {
-  User.findByIdAndUpdate(
+const updateUserData = (req, res) => User.findByIdAndUpdate(
     req.user._id,
     {
       name: req.body.name,
@@ -95,13 +102,13 @@ const updateUserData = (req, res) => {
         return res
           .status(BAD_REQUEST_ERROR)
           .send({ message: "An error has occurred on the server" });
-      } if (err.name === NOT_FOUND) {
-        res.status(NOT_FOUND).send({ message: err.message });
-      } else {
-        res.status(SERVER_ERROR).send({ message: "Error from server" });
       }
+      if (err.statusCode === NOT_FOUND) {
+        return res.status(NOT_FOUND).send({ message: err.message });
+      } 
+        return res.status(SERVER_ERROR).send({ message: "Error from server" });
+      
     });
-};
 
 const getCurrentUser = (req, res) => {
   User.findById(req.user._id)
@@ -127,7 +134,7 @@ const getCurrentUser = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
+  // getUsers,
   createUser,
   getCurrentUser,
   login,

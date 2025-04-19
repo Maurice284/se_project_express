@@ -30,8 +30,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 5,
     select: false, // This prevent the password from being returned in queries by defailt
+    // minlength: 5,
   },
 });
 
