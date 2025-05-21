@@ -50,6 +50,8 @@ const deleteItem = (req, res) => {
     .findById(itemId)
     .orFail()
     .then((item) => {
+      console.log(item.owner.toString());
+      console.log(req.user._id);
       if (item.owner.toString() !== req.user._id) {
         return res
           .status(FORBIDDEN)
@@ -61,6 +63,7 @@ const deleteItem = (req, res) => {
     })
 
     .catch((err) => {
+      console.error(err);
       if (err.name === "DocumentNotFoundError") {
         res.status(NOT_FOUND).send({ message: "Item Not Found" });
       } else if (err.name === "CastError") {
