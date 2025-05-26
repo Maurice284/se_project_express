@@ -1,9 +1,20 @@
-export const BAD_REQUEST_ERROR = 400;
-export const SERVER_ERROR = 500;
-export const CREATED = 201;
-export const OK = 200;
+const BAD_REQUEST_ERROR = 400;
+const SERVER_ERROR = 500;
+const CREATED = 201;
+const OK = 200;
 // export const NO_CONTENT = 204;
-export const NOT_FOUND = 404;
-export const CONFLICT_ERROR = 409;
-export const UNAUTHORIZED_ERROR = 401;
-export const FORBIDDEN = 403;
+const NOT_FOUND = 404;
+const CONFLICT_ERROR = 409;
+const UNAUTHORIZED_ERROR = 401;
+const FORBIDDEN = 403;
+
+module.exports = {
+  BAD_REQUEST_ERROR,
+  SERVER_ERROR,
+  CREATED,
+  OK,
+  NOT_FOUND,
+  CONFLICT_ERROR,
+  UNAUTHORIZED_ERROR,
+  FORBIDDEN,
+};
