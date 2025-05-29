@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const mainRouter = require("./routes/index");
+const errorHandler = require("./middlewares/error-handler");
 
 const app = express();
 app.use(cors());
@@ -22,3 +23,6 @@ app.use("/", mainRouter);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Error handler goes LAST
+app.use(errorHandler);

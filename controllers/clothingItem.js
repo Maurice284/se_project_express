@@ -1,4 +1,6 @@
 const clothingItem = require("../models/clothingItem");
+const ClothingItem = require("../models/clothingItem");
+const BadRequestError = require("../errors/BadRequestError");
 const {
   SERVER_ERROR,
   OK,
@@ -8,7 +10,7 @@ const {
   FORBIDDEN,
 } = require("../utils/errors");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   // console.log("is this firing bro");
   const owner = req.user._id;
   const { name, weather, imageUrl } = req.body;
@@ -17,17 +19,14 @@ const createItem = (req, res) => {
     .create({ name, weather, imageUrl, owner })
 
     .then((item) => {
-      console.log(item);
-      return res.send({ data: item });
+      res.status(201).send(item);
     })
-    .catch((e) => {
-      // console.log(e);
-      if (e.name === "ValidationError")
-        return res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
-
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "Error from createItem" });
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data provided"));
+      } else {
+        next(err);
+      }
     });
 };
 

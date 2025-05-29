@@ -11,6 +11,7 @@ const {
   UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const BadRequestError = require("../errors/BadRequestError");
 
 // GET /users
 
@@ -82,7 +83,8 @@ const createUser = (req, res) => {
     });
 };
 
-const updateUserData = (req, res) => User.findByIdAndUpdate(
+const updateUserData = (req, res) =>
+  User.findByIdAndUpdate(
     req.user._id,
     {
       name: req.body.name,
@@ -105,9 +107,8 @@ const updateUserData = (req, res) => User.findByIdAndUpdate(
       }
       if (err.statusCode === NOT_FOUND) {
         return res.status(NOT_FOUND).send({ message: err.message });
-      } 
-        return res.status(SERVER_ERROR).send({ message: "Error from server" });
-      
+      }
+      return res.status(SERVER_ERROR).send({ message: "Error from server" });
     });
 
 const getCurrentUser = (req, res) => {
