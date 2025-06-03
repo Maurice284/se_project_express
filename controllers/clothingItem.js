@@ -1,5 +1,4 @@
 const clothingItem = require("../models/clothingItem");
-const ClothingItem = require("../models/clothingItem");
 const BadRequestError = require("../errors/BadRequestError");
 const {
   SERVER_ERROR,
@@ -33,6 +32,7 @@ const createItem = (req, res, next) => {
 const getItems = (req, res) => {
   clothingItem
     .find({})
+    .sort({ createdAt: -1 }) // Sort by creation date descending
     .then((items) => res.status(OK).send(items))
     .catch(() => {
       res.status(SERVER_ERROR).send({ message: "Error from getItems" });

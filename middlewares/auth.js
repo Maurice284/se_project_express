@@ -5,6 +5,9 @@ const { JWT_SECRET } = require("../utils/config");
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
   const token = authorization.replace("Bearer ", "");
+
+  // 'Bearer asdfasdf'
+  // ' asdfasdf'
   let payload;
   try {
     payload = jwt.verify(token, JWT_SECRET);
