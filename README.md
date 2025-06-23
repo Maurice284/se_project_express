@@ -1,43 +1,68 @@
-# WTWR (What to Wear?): Back End
+# WTWR (What to Wear?)
 
-Project Description:
+## About the project
 
-The WTWR project is a web application designed to provide a platform for users to interact, register, and access personalized content. The front-end has already been developed, and the focus of the back-end phase is to create a robust server that supports the application's functionality. The server will be built using Express.js, and it will include user authentication and an API to interact with the database. The objective is to establish secure communication between the client and the server, manage user data, and handle errors effectively.
+The WTWR application is designed to help users make weather-based clothing decisions. It connects to an API to fetch daily weather forecasts and suggests suitable clothing items based on the current weather conditions.
 
-Functionality:
+The project is a full-stack application that includes:
 
-The server will facilitate user registration, login, and authentication.
+- Frontend (React)
+- Backend (Express.js, Node.js)
+- Database (MongoDB)
 
-API routes will allow users to interact with data stored in the database.
+## domain name
 
-A secure database connection will store user information and other necessary data.
+https://www.whattowear247.jumpingcrab.com
 
-Error handling mechanisms will be implemented to ensure smooth communication between the client and server.
+## Links
 
-## Project features
+- [Backend Repository](https://github.com/Maurice284/se_project_express)
 
-Techniques Used:
+- [Frontend Repository](https://github.com/Maurice284/se_project_react)
 
-1. Express.js: The project will utilize the Express framework to set up the server. Express simplifies route creation, middleware handling, and server-side logic implementation.
+## Features
 
-2. Database Integration: A database (e.g., MongoDB or SQL-based) will be set up and connected to the server. This will store essential user data and application-related information.
+- User authorization and authentication
+- Real-time weather data integration
+- Clothing item management (add, delete, like)
+- Responsive design for various screen sizes
+- Profile customization
+- Weather-based clothing recommendations
 
-3. User Authorization: Authentication will be implemented using techniques such as JWT (JSON Web Tokens) or session-based authentication, ensuring that only authorized users can access certain parts of the application.
+## Technologies and Techniques Used
 
-4. API Creation: RESTful API routes will be created to handle CRUD (Create, Read, Update, Delete) operations on the data. These routes will communicate with the database to store and retrieve data as required.
+**Frontend:**
 
-5. Error Handling: Proper error handling will be incorporated to manage server crashes, invalid requests, and database-related issues. This ensures the application is resilient and user-friendly.
+- React
+- React Router v6
+- React Context (for state management)
+- CSS3 for styling
+- REST API integration
 
-6. Deployment: Once the server and API are set up, the application will be deployed on a remote machine, ensuring it’s accessible and scalable for production use.
+**Backend:**
 
-In the upcoming sprints, focus will shift to securing the application, performing thorough testing, and refining the deployment process for stability and performance.
+- Express.js
+- Node.js
+- MongoDB
+- JWT for authentication
+- REST API endpoints
 
-## Running the Project
+## Screenshots
 
-`npm run start` — to launch the server
+[Add your application screenshots here]
 
-`npm run dev` — to launch the server with the hot reload feature
+## Demo
 
-### Testing
+[Add link to your demo video if available]
 
-Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
+## Getting Started
+
+To run this project locally:
+
+1. Clone both repositories (frontend and backend)
+2. Install dependencies in both projects using `npm install`
+3. Start the backend server
+4. Start the frontend application
+5. Configure environment variables as needed
+
+## Future Improvements
