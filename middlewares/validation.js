@@ -14,6 +14,7 @@ const validateClothingItem = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     imageUrl: Joi.string().required().custom(validateURL),
+    weather: Joi.string().valid("hot", "warm", "cold").required(),
   }),
 });
 
@@ -50,13 +51,20 @@ const validateAuthentication = celebrate({
 });
 
 // 4. ID validation (e.g., in URL params)
-module.exports.validateId = celebrate({
+const validateId = celebrate({
   params: Joi.object().keys({
-    id: Joi.string().hex().length(24).required().messages({
+    itemId: Joi.string().hex().length(24).required().messages({
       "string.hex": "ID must be a valid hexadecimal string",
       "string.length": "ID must be exactly 24 characters long",
       "string.empty": "ID is required",
     }),
+  }),
+});
+
+const validateUserPatchBody = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    avatar: Joi.string().required().custom(validateURL),
   }),
 });
 
@@ -66,4 +74,5 @@ module.exports = {
   validateAuthentication,
   validateURL,
   validateId,
+  validateUserPatchBody,
 };

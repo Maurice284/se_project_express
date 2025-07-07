@@ -1,13 +1,8 @@
 const clothingItem = require("../models/clothingItem");
 const BadRequestError = require("../errors/BadRequestError");
-const {
-  SERVER_ERROR,
-  OK,
-  // NO_CONTENT,
-  BAD_REQUEST_ERROR,
-  NOT_FOUND,
-  FORBIDDEN,
-} = require("../utils/errors");
+const NotFoundError = require("../errors/NotFoundError");
+const ForbiddenError = require("../errors/ForbiddenError");
+const { OK } = require("../utils/errors");
 
 const createItem = (req, res, next) => {
   // console.log("is this firing bro");
@@ -29,17 +24,17 @@ const createItem = (req, res, next) => {
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   clothingItem
     .find({})
     .sort({ createdAt: -1 }) // Sort by creation date descending
     .then((items) => res.status(OK).send(items))
-    .catch(() => {
-      res.status(SERVER_ERROR).send({ message: "Error from getItems" });
+    .catch((err) => {
+      next(err);
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   // before we delete the item, we need to check if the currently logged-in user owns this item
@@ -52,10 +47,9 @@ const deleteItem = (req, res) => {
       console.log(item.owner.toString());
       console.log(req.user._id);
       if (item.owner.toString() !== req.user._id) {
-        return res
-          .status(FORBIDDEN)
-          .send({ message: "Forbidden: You do not own this item" });
+        return next(new ForbiddenError("Forbidden: You do not own this item"));
       }
+
       return clothingItem
         .findByIdAndDelete(itemId)
         .then((deletedItem) => res.status(OK).send(deletedItem));
@@ -64,18 +58,16 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({ message: "Item Not Found" });
-      } else if (err.name === "CastError") {
-        res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: "Error Invalid Item Id" });
-      } else {
-        res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
+        return next(new NotFoundError("ID not found"));
       }
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Error Invalid Item Id"));
+      }
+      return next(err);
     });
 };
 
-const addLike = (req, res) => {
+const addLike = (req, res, next) => {
   const { itemId } = req.params;
 
   return clothingItem
@@ -88,18 +80,17 @@ const addLike = (req, res) => {
     .then((item) => res.status(OK).send(item))
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST_ERROR).send({ message: "Bad Request" });
+        return next(new BadRequestError());
       }
       if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({ message: "Error Invalid Item Id" });
+        return next(new NotFoundError());
       }
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "Error from deleteItem" });
+
+      return next(err);
     });
 };
 
-const removeLike = (req, res) => {
+const removeLike = (req, res, next) => {
   const { itemId } = req.params;
 
   clothingItem
@@ -112,15 +103,14 @@ const removeLike = (req, res) => {
     .then((item) => res.status(OK).send(item))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "NotFound" });
+        return next(new NotFoundError());
       }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST_ERROR).send({ message: "BadRequest" });
+        return next(new BadRequestError());
       }
       console.log(err);
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "Error from deleteItem" });
+
+      return next(err);
     });
 };
 

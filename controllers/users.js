@@ -3,19 +3,18 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const {
   OK,
-  SERVER_ERROR,
   CREATED,
   BAD_REQUEST_ERROR,
   NOT_FOUND,
   CONFLICT_ERROR,
-  UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 const BadRequestError = require("../errors/BadRequestError");
-
+const UnauthorizeError = require("../errors/UnauthorizedError");
+const NotFoundError = require("../errors/NotFoundError");
 // GET /users
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -33,28 +32,13 @@ const login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Incorrect email or password")
-        return res
-          .status(UNAUTHORIZED_ERROR)
-          .send({ message: "Unauthorize error" });
+        return next(new UnauthorizeError("Unauthorize Error"));
 
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "Internal server error" });
+      return next(err);
     });
 };
 
-// const getUsers = (req, res) => {
-//   User.find({})
-//     .then((users) => res.status(OK).send(users))
-//     .catch((err) => {
-//       console.error(err);
-//       return res
-//         .status(SERVER_ERROR)
-//         .send({ message: "An error has occurred on the server" });
-//     });
-// };
-
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   // console.log("avatar:", avatar);
   return bcrypt
@@ -73,17 +57,13 @@ const createUser = (req, res) => {
       }
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: "An error has occurred on the server" });
+        return next(new BadRequestError("Bad Request Error"));
       }
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
-const updateUserData = (req, res) =>
+const updateUserData = (req, res, next) =>
   User.findByIdAndUpdate(
     req.user._id,
     {
@@ -101,36 +81,28 @@ const updateUserData = (req, res) =>
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: "An error has occurred on the server" });
+        return next(new BadRequestError("An error has occurred on the server"));
       }
       if (err.statusCode === NOT_FOUND) {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return next(new NotFoundError("Error not found"));
       }
-      return res.status(SERVER_ERROR).send({ message: "Error from server" });
+      return next(err);
     });
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .orFail()
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "An error has occurred on the server" });
+        return next(new NotFoundError("Error not found"));
       } // ( handle the cast error)
       if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST_ERROR)
-          .send({ message: "An error has occurred on the server" });
+        return next(new BadRequestError("An error has occurred on the server"));
       }
 
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
