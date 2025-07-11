@@ -80,10 +80,10 @@ const addLike = (req, res, next) => {
     .then((item) => res.status(OK).send(item))
     .catch((err) => {
       if (err.name === "CastError") {
-        return next(new BadRequestError());
+        return next(new BadRequestError("Error Invalid Item Id"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError());
+        return next(new NotFoundError("ID not found"));
       }
 
       return next(err);
@@ -103,10 +103,10 @@ const removeLike = (req, res, next) => {
     .then((item) => res.status(OK).send(item))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError());
+        return next(new NotFoundError("ID not found"));
       }
       if (err.name === "CastError") {
-        return next(new BadRequestError());
+        return next(new BadRequestError("Error Invalid Item Id"));
       }
       console.log(err);
 

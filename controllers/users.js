@@ -18,9 +18,9 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST_ERROR)
-      .send({ message: "The password and email fields are required" });
+    return next(
+      new BadRequestError("The password and email fields are required")
+    );
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -53,7 +53,8 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(CONFLICT_ERROR).send({ message: "Conflict Error" });
+        // return res.status(CONFLICT_ERROR).send({ message: "Conflict Error" });
+        return next(new ConflictError("Conflict Error"));
       }
       console.error(err);
       if (err.name === "ValidationError") {

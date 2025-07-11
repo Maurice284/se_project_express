@@ -8,6 +8,7 @@ const {
 } = require("../middlewares/validation");
 
 const userRouter = require("./users");
+const NotFoundError = require("../errors/NotFoundError");
 
 router.get("/crash-test", () => {
   setTimeout(() => {
@@ -19,8 +20,9 @@ router.post("/signin", validateAuthentication, login);
 router.use("/users", userRouter);
 router.use("/items", clothingItem);
 
-router.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: "Not Found" });
+router.use((req, res, next) => {
+  return next(new NotFoundError("Not Found"));
+  // res.status(NOT_FOUND).send({ message: "Not Found" });
 });
 
 module.exports = router;
